@@ -9,15 +9,15 @@
 
 ## Vulnerability Analysis
 
-- 88mph’s functionality allows users to deposit their assets into the DInterest contract, which mints the user an ERC721 token that contains information about the deposit amount and maturity of the deposit. It also makes an external call to the MPHMinter contract to forward the call to the vesting03 contract, which mints another ERC721 token. This second token contains information regarding vesting status, and vesting03 further allows users to claim their reward in the form of 88mph tokens.
+88mph’s functionality allows users to deposit their assets into the DInterest contract, which mints the user an ERC721 token that contains information about the deposit amount and maturity of the deposit. It also makes an external call to the MPHMinter contract to forward the call to the vesting03 contract, which mints another ERC721 token. This second token contains information regarding vesting status, and vesting03 further allows users to claim their reward in the form of 88mph tokens.
 
-- The vulnerability existed in the vesting03 contract in the createVestForDeposit() function. This function is responsible for storing initial information regarding user deposit and minting the vestID.
+The vulnerability existed in the vesting03 contract in the createVestForDeposit() function. This function is responsible for storing initial information regarding user deposit and minting the vestID.
 
-- However, this function didn’t update the vestRewardPerTokenPaid[vestID] with the current rewardPerToken, which should actually be very low after an immediate deposit because not enough time has passed for the user to earn their full token reward. So, the \_earned() function in the withdraw() function will calculate as though the user were eligible for the full rewardPerToken from the amount that they deposited.
+However, this function didn’t update the vestRewardPerTokenPaid[vestID] with the current rewardPerToken, which should actually be very low after an immediate deposit because not enough time has passed for the user to earn their full token reward. So, the \_earned() function in the withdraw() function will calculate as though the user were eligible for the full rewardPerToken from the amount that they deposited.
 
-- A flashloan is the most natural way to exploit this vulnerability.
+A flashloan is the most natural way to exploit this vulnerability.
 
-- Here are the steps to reproduce the attack:
+Here are the steps to reproduce the attack:
 
 - Flashloan WETH from Uniswap or AAVE.
 - Call deposit() to the DInterest contract to deposit WETH.
@@ -28,5 +28,7 @@
 
 ## Setup
 
+```
 forge build
 forge test --match-path test/WithFlashloan.t.sol -vvv
+```
